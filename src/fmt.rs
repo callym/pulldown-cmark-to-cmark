@@ -195,12 +195,15 @@ where
                     TableHead => Ok(()),
                     TableRow => Ok(()),
                     TableCell => formatter.write_char('|'),
-                    Link(_, _) => formatter.write_char('['),
-                    Image(_, _) => formatter.write_str("!["),
+                    Link(_, _, _) => formatter.write_char('['),
+                    Image(_, _, _) => formatter.write_str("!["),
                     Emphasis => formatter.write_char('*'),
                     Strong => formatter.write_str("**"),
                     Code => formatter.write_char('`'),
-                    FootnoteDefinition(ref name) => write!(formatter, "[^{}]: ", name),
+                    FootnoteDefinition(ref name) => {
+                        write!(formatter, "[^{}]: ", name.clone().to_string())
+                    }
+                    HtmlBlock => Ok(()),
                     Paragraph => Ok(()),
                     Rule => formatter.write_str("---"),
                     Header(n) => {
@@ -223,11 +226,16 @@ where
                 }
             }
             End(ref tag) => match *tag {
-                Image(ref uri, ref title) | Link(ref uri, ref title) => {
+                Image(_, ref uri, ref title) | Link(_, ref uri, ref title) => {
                     if title.is_empty() {
-                        write!(formatter, "]({})", uri)
+                        write!(formatter, "]({})", uri.clone().to_string())
                     } else {
-                        write!(formatter, "]({uri} \"{title}\")", uri = uri, title = title)
+                        write!(
+                            formatter,
+                            "]({uri} \"{title}\")",
+                            uri = uri.clone().to_string(),
+                            title = title.clone().to_string()
+                        )
                     }
                 }
                 Code => formatter.write_char('`'),
@@ -322,6 +330,12 @@ where
                     Ok(())
                 }
                 FootnoteDefinition(_) => Ok(()),
+                HtmlBlock => {
+                    if state.newlines_before_start < options.newlines_after_html {
+                        state.newlines_before_start = options.newlines_after_html;
+                    }
+                    Ok(())
+                },
             },
             HardBreak => formatter
                 .write_str("  \n")
@@ -331,7 +345,7 @@ where
                 .and(padding(&mut formatter, &state.padding)),
             Text(ref text) => {
                 if state.table_alignments.len() != state.table_headers.len() {
-                    state.table_headers.push(text.clone().into());
+                    state.table_headers.push(text.clone().to_string());
                 }
                 consume_newlines(&mut formatter, &mut state)?;
                 print_text(text, &mut formatter, &state.padding)
@@ -339,14 +353,10 @@ where
             Html(ref text) => {
                 consume_newlines(&mut formatter, &mut state)?;
                 print_text(text, &mut formatter, &state.padding)?;
-
-                if state.newlines_before_start < options.newlines_after_html {
-                    state.newlines_before_start = options.newlines_after_html;
-                }
                 Ok(())
             }
             InlineHtml(ref name) => formatter.write_str(name),
-            FootnoteReference(ref name) => write!(formatter, "[^{}]", name),
+            FootnoteReference(ref name) => write!(formatter, "[^{}]", name.clone().to_string()),
         }?
     }
     Ok(state)
