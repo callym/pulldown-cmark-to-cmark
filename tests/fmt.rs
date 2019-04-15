@@ -399,6 +399,24 @@ mod table {
     use pulldown_cmark_to_cmark::fmt::Alignment;
 
     #[test]
+    fn it_does_stuff() {
+        use pulldown_cmark::{Options, Parser};
+
+        let s = indoc!(
+            "
+            | Tables        | Are           | Cool  | yo |
+            |---------------|:-------------:|------:|:---|
+            | col 3 is      | right-aligned | $1600 | x  |"
+        );
+        let p = Parser::new_ext(s, Options::all());
+        for event in p {
+            dbg!(event);
+        }
+
+        panic!("aaa");
+    }
+
+    #[test]
     fn it_forget_alignments_and_headers_at_the_end_of_tables() {
         assert_eq!(
             fmtes(
