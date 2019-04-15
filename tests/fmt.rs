@@ -269,6 +269,25 @@ mod blockquote {
 
     #[test]
     fn with_html() {
+
+        use pulldown_cmark::{Options, Parser};
+
+       let s = indoc!(
+               "
+        > <table>
+        > </table>"
+           );
+       let p = Parser::new_ext(s, Options::all());
+       for event in p {
+           dbg!(event);
+       }
+       eprintln!("------------------");
+       let soo = " > <table>\n > \n > </table>";
+       let poo = Parser::new_ext(soo, Options::all());
+       for event in poo {
+           dbg!(event);
+       }
+
         assert_eq!(
             fmts(indoc!(
                 "
@@ -276,7 +295,8 @@ mod blockquote {
          > </table>"
             )).0,
             " > <table>\n > </table>",
-        )
+        );
+        panic!("aaa");
     }
     #[test]
     fn with_inlinehtml() {
@@ -316,7 +336,7 @@ mod blockquote {
             fmts(indoc!(
                 "
              > a
-             > b  
+             > b
              > c"
             )),
             (
