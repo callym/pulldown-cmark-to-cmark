@@ -399,21 +399,33 @@ mod table {
     use pulldown_cmark_to_cmark::fmt::Alignment;
 
     #[test]
-    fn it_does_stuff() {
+    fn it_generates_equivalent_table_markdown() {
         use pulldown_cmark::{Options, Parser};
 
-        let s = indoc!(
+        let original_table_markdown = indoc!(
             "
             | Tables        | Are           | Cool  | yo |
             |---------------|:-------------:|------:|:---|
-            | col 3 is      | right-aligned | $1600 | x  |"
+            | col 3 is      | right-aligned | $1600 | x  |
+            | col 2 is      | centered      |   $12 | y  |
+            | zebra stripes | are neat      |    $1 | z  |"
         );
-        let p = Parser::new_ext(s, Options::all());
-        for event in p {
-            dbg!(event);
-        }
+        let p = Parser::new_ext(original_table_markdown, Options::all());
+        let original_events: Vec<_> = p.into_iter().collect();
 
-        panic!("aaa");
+        let (generated_markdown, _) = fmte(&original_events);
+
+        assert_eq!(generated_markdown, indoc!("
+            |Tables        |Are           |Cool  |yo |
+            |--------------|:------------:|-----:|:--|
+            |col 3 is      |right-aligned |$1600 |x  |
+            |col 2 is      |centered      |$12 |y  |
+            |zebra stripes |are neat      |$1 |z  |"));
+
+        let p = Parser::new_ext(&generated_markdown, Options::all());
+        let generated_events: Vec<_> = p.into_iter().collect();
+
+        assert_eq!(original_events, generated_events);
     }
 
     #[test]
