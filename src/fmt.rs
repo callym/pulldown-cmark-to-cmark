@@ -199,7 +199,6 @@ where
                     Image(..) => formatter.write_str("!["),
                     Emphasis => formatter.write_char('*'),
                     Strong => formatter.write_str("**"),
-                    Code => formatter.write_char('`'),
                     FootnoteDefinition(ref name) => write!(formatter, "[^{}]: ", name),
                     Paragraph => Ok(()),
                     Rule => formatter.write_str("---"),
@@ -232,7 +231,6 @@ where
                         write!(formatter, "]({uri} \"{title}\")", uri = uri, title = title)
                     }
                 }
-                Code => formatter.write_char('`'),
                 Emphasis => formatter.write_char('*'),
                 Strong => formatter.write_str("**"),
                 Header(_) => {
@@ -354,6 +352,7 @@ where
                 let check = if checked { "x" } else { " " };
                 write!(formatter, "[{}] ", check)
             }
+            Code(ref text) => write!(formatter, "`{}`", dbg!(text)),
         }?
     }
     Ok(state)

@@ -66,10 +66,6 @@ mod start {
         assert_eq!(s(Start(Strong)), "**")
     }
     #[test]
-    fn code() {
-        assert_eq!(s(Start(Code)), "`")
-    }
-    #[test]
     fn link() {
         assert_eq!(s(Start(Link(Inline, "uri".into(), "title".into()))), "[")
     }
@@ -158,10 +154,6 @@ mod end {
         assert_eq!(s(End(Item)), "")
     }
     #[test]
-    fn code() {
-        assert_eq!(s(End(Code)), "`")
-    }
-    #[test]
     fn link() {
         assert_eq!(
             s(End(Link(Inline, "/uri".into(), "title".into()))),
@@ -218,6 +210,10 @@ fn html() {
 #[test]
 fn inlinehtml() {
     assert_eq!(s(Event::InlineHtml("<br>".into())), "<br>")
+}
+#[test]
+fn code() {
+    assert_eq!(s(Event::Code("asdf".into())), "`asdf`")
 }
 #[test]
 fn text() {
