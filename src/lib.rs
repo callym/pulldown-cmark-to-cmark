@@ -69,6 +69,7 @@ pub struct Options {
     pub newlines_after_blockquote: usize,
     pub newlines_after_rest: usize,
     pub code_block_backticks: usize,
+    pub underlines_for_emphasis: bool,
 }
 
 impl Default for Options {
@@ -83,6 +84,7 @@ impl Default for Options {
             newlines_after_blockquote: 2,
             newlines_after_rest: 1,
             code_block_backticks: 4,
+            underlines_for_emphasis: false,
         }
     }
 }
@@ -270,7 +272,10 @@ where
                     }
                     Link(..) => formatter.write_char('['),
                     Image(..) => formatter.write_str("!["),
-                    Emphasis => formatter.write_char('*'),
+                    Emphasis => match options.underlines_for_emphasis {
+                        true => formatter.write_char('_'),
+                        false => formatter.write_char('*'),
+                    },
                     Strong => formatter.write_str("**"),
                     FootnoteDefinition(ref name) => write!(formatter, "[^{}]: ", name),
                     Paragraph => Ok(()),
@@ -312,10 +317,12 @@ where
                             Ok(())
                         };
 
-                        s.and_then(|_| formatter.write_str(&"`".repeat(options.code_block_backticks)))
-                            .and_then(|_| formatter.write_str(info))
-                            .and_then(|_| formatter.write_char('\n'))
-                            .and_then(|_| padding(&mut formatter, &state.padding))
+                        s.and_then(|_| {
+                            formatter.write_str(&"`".repeat(options.code_block_backticks))
+                        })
+                        .and_then(|_| formatter.write_str(info))
+                        .and_then(|_| formatter.write_char('\n'))
+                        .and_then(|_| padding(&mut formatter, &state.padding))
                     }
                     List(_) => Ok(()),
                     Strikethrough => formatter.write_str("~~"),
@@ -329,7 +336,10 @@ where
                         write!(formatter, "]({uri} \"{title}\")", uri = uri, title = title)
                     }
                 }
-                Emphasis => formatter.write_char('*'),
+                Emphasis => match options.underlines_for_emphasis {
+                    true => formatter.write_char('_'),
+                    false => formatter.write_char('*'),
+                },
                 Strong => formatter.write_str("**"),
                 Heading(_) => {
                     if state.newlines_before_start < options.newlines_after_headline {
