@@ -60,6 +60,7 @@ pub struct Options {
     pub newlines_after_rule: usize,
     pub newlines_after_list: usize,
     pub newlines_after_rest: usize,
+    pub underlines_for_emphasis: bool,
 }
 
 impl Default for Options {
@@ -73,6 +74,7 @@ impl Default for Options {
             newlines_after_rule: 2,
             newlines_after_list: 2,
             newlines_after_rest: 1,
+            underlines_for_emphasis: false,
         }
     }
 }
@@ -197,7 +199,10 @@ where
                     TableCell => formatter.write_char('|'),
                     Link(..) => formatter.write_char('['),
                     Image(..) => formatter.write_str("!["),
-                    Emphasis => formatter.write_char('*'),
+                    Emphasis => match options.underlines_for_emphasis { 
+                        true => formatter.write_char('_'),
+                        false => formatter.write_char('*')
+                    },
                     Strong => formatter.write_str("**"),
                     FootnoteDefinition(ref name) => write!(formatter, "[^{}]: ", name),
                     Paragraph => Ok(()),
@@ -231,7 +236,10 @@ where
                         write!(formatter, "]({uri} \"{title}\")", uri = uri, title = title)
                     }
                 }
-                Emphasis => formatter.write_char('*'),
+                Emphasis => match options.underlines_for_emphasis { 
+                    true => formatter.write_char('_'),
+                    false => formatter.write_char('*')
+                },
                 Strong => formatter.write_str("**"),
                 Header(_) => {
                     if state.newlines_before_start < options.newlines_after_headline {
