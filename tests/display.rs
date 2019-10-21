@@ -22,18 +22,6 @@ mod start {
         assert_eq!(s(Start(Paragraph)), "")
     }
     #[test]
-    fn rule() {
-        assert_eq!(s(Start(Rule)), "---")
-    }
-    #[test]
-    fn header1() {
-        assert_eq!(s(Start(Header(1))), "# ")
-    }
-    #[test]
-    fn header2() {
-        assert_eq!(s(Start(Header(2))), "## ")
-    }
-    #[test]
     fn blockquote() {
         assert_eq!(s(Start(BlockQuote)), " > ")
     }
@@ -110,16 +98,8 @@ mod end {
     use super::s;
 
     #[test]
-    fn header() {
-        assert_eq!(s(End(Header(2))), "")
-    }
-    #[test]
     fn paragraph() {
         assert_eq!(s(End(Paragraph)), "")
-    }
-    #[test]
-    fn rule() {
-        assert_eq!(s(End(Rule)), "")
     }
     #[test]
     fn blockquote() {
@@ -206,10 +186,6 @@ fn html() {
         s(Event::Html("<table>hi</table>".into())),
         "<table>hi</table>"
     )
-}
-#[test]
-fn inlinehtml() {
-    assert_eq!(s(Event::InlineHtml("<br>".into())), "<br>")
 }
 #[test]
 fn code() {

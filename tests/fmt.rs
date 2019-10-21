@@ -107,9 +107,9 @@ fn it_applies_newlines_before_start_before_html_and_enforces_newline_after() {
     assert_eq!(
         fmtes(
             &[
-                Event::Start(Tag::HtmlBlock),
+                // Event::Start(Tag::HtmlBlock),
                 Event::Html("<e>".into()),
-                Event::End(Tag::HtmlBlock),
+                // Event::End(Tag::HtmlBlock),
             ],
             State {
                 newlines_before_start: 2,
